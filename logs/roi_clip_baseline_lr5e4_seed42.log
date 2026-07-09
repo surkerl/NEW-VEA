@@ -1,0 +1,43 @@
+Run: roi_clip_baseline_lr5e4_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Epoch 001/100 | train_loss=1.6907 train_acc=0.3377 | test_loss=1.5538 test_acc=0.5236 | lr=5.00e-04 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=1.4368 train_acc=0.5945 | test_loss=1.3627 test_acc=0.6364 | lr=5.00e-04 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=1.2602 train_acc=0.6486 | test_loss=1.2332 test_acc=0.6599 | lr=5.00e-04 | patience=0/25 (new best)
+Epoch 004/100 | train_loss=1.1429 train_acc=0.6746 | test_loss=1.1450 test_acc=0.6616 | lr=4.99e-04 | patience=0/25 (new best)
+Epoch 005/100 | train_loss=1.0551 train_acc=0.6883 | test_loss=1.0825 test_acc=0.6616 | lr=4.98e-04 | patience=1/25
+Epoch 006/100 | train_loss=0.9921 train_acc=0.6941 | test_loss=1.0356 test_acc=0.6734 | lr=4.97e-04 | patience=0/25 (new best)
+Epoch 007/100 | train_loss=0.9411 train_acc=0.7136 | test_loss=0.9994 test_acc=0.6902 | lr=4.96e-04 | patience=0/25 (new best)
+Epoch 008/100 | train_loss=0.9005 train_acc=0.7063 | test_loss=0.9750 test_acc=0.6785 | lr=4.94e-04 | patience=1/25
+Epoch 009/100 | train_loss=0.8711 train_acc=0.7258 | test_loss=0.9489 test_acc=0.6970 | lr=4.92e-04 | patience=0/25 (new best)
+Epoch 010/100 | train_loss=0.8405 train_acc=0.7280 | test_loss=0.9319 test_acc=0.6936 | lr=4.90e-04 | patience=1/25
+Epoch 011/100 | train_loss=0.8123 train_acc=0.7316 | test_loss=0.9169 test_acc=0.6970 | lr=4.88e-04 | patience=2/25
+Epoch 012/100 | train_loss=0.7909 train_acc=0.7417 | test_loss=0.9052 test_acc=0.6852 | lr=4.85e-04 | patience=3/25
+Epoch 013/100 | train_loss=0.7773 train_acc=0.7468 | test_loss=0.8944 test_acc=0.6852 | lr=4.82e-04 | patience=4/25
+Epoch 014/100 | train_loss=0.7655 train_acc=0.7504 | test_loss=0.8832 test_acc=0.6919 | lr=4.79e-04 | patience=5/25
+Epoch 015/100 | train_loss=0.7415 train_acc=0.7417 | test_loss=0.8771 test_acc=0.6852 | lr=4.76e-04 | patience=6/25
+Epoch 016/100 | train_loss=0.7340 train_acc=0.7540 | test_loss=0.8714 test_acc=0.6852 | lr=4.73e-04 | patience=7/25
+Epoch 017/100 | train_loss=0.7288 train_acc=0.7648 | test_loss=0.8619 test_acc=0.6936 | lr=4.69e-04 | patience=8/25
+Epoch 018/100 | train_loss=0.6985 train_acc=0.7677 | test_loss=0.8593 test_acc=0.6886 | lr=4.65e-04 | patience=9/25
+Epoch 019/100 | train_loss=0.6950 train_acc=0.7684 | test_loss=0.8548 test_acc=0.6886 | lr=4.61e-04 | patience=10/25
+Epoch 020/100 | train_loss=0.6833 train_acc=0.7698 | test_loss=0.8508 test_acc=0.6852 | lr=4.57e-04 | patience=11/25
+Epoch 021/100 | train_loss=0.6759 train_acc=0.7720 | test_loss=0.8454 test_acc=0.6869 | lr=4.52e-04 | patience=12/25
+Epoch 022/100 | train_loss=0.6699 train_acc=0.7670 | test_loss=0.8436 test_acc=0.6869 | lr=4.48e-04 | patience=13/25
+Epoch 023/100 | train_loss=0.6539 train_acc=0.7771 | test_loss=0.8393 test_acc=0.6886 | lr=4.43e-04 | patience=14/25
+Epoch 024/100 | train_loss=0.6571 train_acc=0.7698 | test_loss=0.8364 test_acc=0.6886 | lr=4.38e-04 | patience=15/25
+Epoch 025/100 | train_loss=0.6558 train_acc=0.7771 | test_loss=0.8354 test_acc=0.6869 | lr=4.32e-04 | patience=16/25
+Epoch 026/100 | train_loss=0.6417 train_acc=0.7756 | test_loss=0.8330 test_acc=0.6886 | lr=4.27e-04 | patience=17/25
+Epoch 027/100 | train_loss=0.6399 train_acc=0.7799 | test_loss=0.8305 test_acc=0.6902 | lr=4.21e-04 | patience=18/25
+Epoch 028/100 | train_loss=0.6300 train_acc=0.7900 | test_loss=0.8281 test_acc=0.6902 | lr=4.15e-04 | patience=19/25
+Epoch 029/100 | train_loss=0.6179 train_acc=0.7937 | test_loss=0.8284 test_acc=0.6886 | lr=4.10e-04 | patience=20/25
+Epoch 030/100 | train_loss=0.6222 train_acc=0.7799 | test_loss=0.8253 test_acc=0.6919 | lr=4.03e-04 | patience=21/25
+Epoch 031/100 | train_loss=0.6244 train_acc=0.7835 | test_loss=0.8234 test_acc=0.6953 | lr=3.97e-04 | patience=22/25
+Epoch 032/100 | train_loss=0.6154 train_acc=0.7908 | test_loss=0.8231 test_acc=0.6919 | lr=3.91e-04 | patience=23/25
+Epoch 033/100 | train_loss=0.5991 train_acc=0.7994 | test_loss=0.8216 test_acc=0.6902 | lr=3.84e-04 | patience=24/25
+Epoch 034/100 | train_loss=0.6047 train_acc=0.7814 | test_loss=0.8202 test_acc=0.6953 | lr=3.78e-04 | patience=25/25
+Early stopping triggered at epoch 34.
+best_acc=0.6970
+best_epoch=9
+best_checkpoint=checkpoints\roi_clip_baseline_lr5e4_seed42\best.pt
+log_path=logs\roi_clip_baseline_lr5e4_seed42.log

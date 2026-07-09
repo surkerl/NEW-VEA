@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_clip_baseline_lr5e4_seed43/best.pt
+test_loss: 0.825177
+test_acc: 0.698653
+macro_f1: 0.700545
+
+              precision    recall  f1-score   support
+
+       anger     0.7342    0.5859    0.6517        99
+     disgust     0.8889    0.8081    0.8466        99
+        fear     0.5833    0.7071    0.6393        99
+         joy     0.6981    0.7475    0.7220        99
+     sadness     0.7527    0.7071    0.7292        99
+    surprise     0.5943    0.6364    0.6146        99
+
+    accuracy                         0.6987       594
+   macro avg     0.7086    0.6987    0.7005       594
+weighted avg     0.7086    0.6987    0.7005       594

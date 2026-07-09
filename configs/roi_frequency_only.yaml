@@ -1,0 +1,27 @@
+dataset:
+  name: emotionroi
+  root: "D:/OneDrive/Desktop/TEP-VEA/EmotionROI"
+  input_size: 224
+  use_official_split: true
+
+model:
+  name: frequency_only
+  num_bands: 6
+  num_orientations: 6
+  dropout: 0.2
+
+train:
+  epochs: 100
+  batch_size: 64
+  num_workers: 4
+  seed: 42
+  deterministic: true
+  use_deterministic_algorithms: false
+  amp: true
+  patience: 25
+  weight_decay: 1.0e-4
+  lr: 1.0e-3
+  min_lr: 1.0e-6
+
+logging:
+  run_name: "roi_frequency_only_seed42"

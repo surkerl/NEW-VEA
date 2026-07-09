@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_clip_baseline_seed42_speedfix/best.pt
+test_loss: 0.844105
+test_acc: 0.693603
+macro_f1: 0.695472
+
+              precision    recall  f1-score   support
+
+       anger     0.7284    0.5960    0.6556        99
+     disgust     0.8817    0.8283    0.8542        99
+        fear     0.5909    0.6566    0.6220        99
+         joy     0.7184    0.7475    0.7327        99
+     sadness     0.7292    0.7071    0.7179        99
+    surprise     0.5586    0.6263    0.5905        99
+
+    accuracy                         0.6936       594
+   macro avg     0.7012    0.6936    0.6955       594
+weighted avg     0.7012    0.6936    0.6955       594

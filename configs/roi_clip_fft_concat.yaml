@@ -1,0 +1,34 @@
+dataset:
+  name: emotionroi
+  root: "D:/OneDrive/Desktop/TEP-VEA/EmotionROI"
+  input_size: 224
+  use_official_split: true
+
+model:
+  name: clip_fft_concat
+  clip_model: "ViT-B-16"
+  clip_pretrained: "openai"
+  freeze_clip: true
+  train_last_n_blocks: 0
+  num_bands: 6
+  num_orientations: 6
+  spectral_dim: 256
+  dropout: 0.2
+
+train:
+  epochs: 100
+  batch_size: 32
+  num_workers: 4
+  seed: 42
+  deterministic: true
+  use_deterministic_algorithms: false
+  amp: true
+  patience: 25
+  weight_decay: 1.0e-4
+  head_lr: 5.0e-4
+  spectral_lr: 5.0e-4
+  backbone_lr: 1.0e-5
+  min_lr: 1.0e-6
+
+logging:
+  run_name: "roi_clip_fft_concat_seed42"

@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+
+# Keep training logs/results, but do not commit model weights.
+checkpoints/**/*.pt
+checkpoints/**/*.pth
+checkpoints/**/*.ckpt
+
+# Background process plumbing used by local runs.
+logs/*_process.out
+logs/*_process.err
+logs/*_pid.txt
+
+# Local verification runs; keep formal experiment logs/results tracked.
+logs/smoke*.log
+logs/repro*.log
+results/smoke*/
+results/repro*/
+
+.env
+.venv/
+venv/

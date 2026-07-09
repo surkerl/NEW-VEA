@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_frequency_only_seed42/best.pt
+test_loss: 1.731581
+test_acc: 0.262626
+macro_f1: 0.218779
+
+              precision    recall  f1-score   support
+
+       anger     0.2308    0.1212    0.1589        99
+     disgust     0.2736    0.5859    0.3730        99
+        fear     0.2439    0.5051    0.3289        99
+         joy     0.0000    0.0000    0.0000        99
+     sadness     0.3750    0.1818    0.2449        99
+    surprise     0.2400    0.1818    0.2069        99
+
+    accuracy                         0.2626       594
+   macro avg     0.2272    0.2626    0.2188       594
+weighted avg     0.2272    0.2626    0.2188       594

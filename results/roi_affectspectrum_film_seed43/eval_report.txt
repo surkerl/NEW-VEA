@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_affectspectrum_film_seed43/best.pt
+test_loss: 0.818158
+test_acc: 0.703704
+macro_f1: 0.706418
+
+              precision    recall  f1-score   support
+
+       anger     0.6977    0.6061    0.6486        99
+     disgust     0.9302    0.8081    0.8649        99
+        fear     0.5856    0.6566    0.6190        99
+         joy     0.7327    0.7475    0.7400        99
+     sadness     0.7374    0.7374    0.7374        99
+    surprise     0.5946    0.6667    0.6286        99
+
+    accuracy                         0.7037       594
+   macro avg     0.7130    0.7037    0.7064       594
+weighted avg     0.7130    0.7037    0.7064       594

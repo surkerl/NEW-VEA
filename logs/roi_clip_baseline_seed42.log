@@ -1,0 +1,28 @@
+Run: roi_clip_baseline_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Epoch 001/100 | train_loss=1.5779 train_acc=0.4430 | test_loss=1.3595 test_acc=0.6162 | lr=1.00e-03 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=1.2068 train_acc=0.6479 | test_loss=1.1388 test_acc=0.6599 | lr=1.00e-03 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=1.0214 train_acc=0.6861 | test_loss=1.0272 test_acc=0.6717 | lr=9.99e-04 | patience=0/25 (new best)
+Epoch 004/100 | train_loss=0.9184 train_acc=0.7114 | test_loss=0.9636 test_acc=0.6902 | lr=9.98e-04 | patience=0/25 (new best)
+Epoch 005/100 | train_loss=0.8579 train_acc=0.7229 | test_loss=0.9296 test_acc=0.6835 | lr=9.96e-04 | patience=1/25
+Epoch 006/100 | train_loss=0.8181 train_acc=0.7244 | test_loss=0.8999 test_acc=0.6936 | lr=9.94e-04 | patience=0/25 (new best)
+Epoch 007/100 | train_loss=0.7700 train_acc=0.7576 | test_loss=0.8820 test_acc=0.6801 | lr=9.91e-04 | patience=1/25
+Epoch 008/100 | train_loss=0.7429 train_acc=0.7525 | test_loss=0.8699 test_acc=0.6835 | lr=9.88e-04 | patience=2/25
+Epoch 009/100 | train_loss=0.7130 train_acc=0.7576 | test_loss=0.8563 test_acc=0.6869 | lr=9.84e-04 | patience=3/25
+Epoch 010/100 | train_loss=0.6914 train_acc=0.7633 | test_loss=0.8456 test_acc=0.6835 | lr=9.80e-04 | patience=4/25
+Epoch 011/100 | train_loss=0.6880 train_acc=0.7662 | test_loss=0.8402 test_acc=0.6953 | lr=9.76e-04 | patience=0/25 (new best)
+Epoch 012/100 | train_loss=0.6589 train_acc=0.7670 | test_loss=0.8316 test_acc=0.6886 | lr=9.70e-04 | patience=1/25
+Epoch 013/100 | train_loss=0.6535 train_acc=0.7684 | test_loss=0.8247 test_acc=0.6987 | lr=9.65e-04 | patience=0/25 (new best)
+Epoch 014/100 | train_loss=0.6336 train_acc=0.7684 | test_loss=0.8230 test_acc=0.7020 | lr=9.59e-04 | patience=0/25 (new best)
+Epoch 015/100 | train_loss=0.6071 train_acc=0.7915 | test_loss=0.8257 test_acc=0.6902 | lr=9.52e-04 | patience=1/25
+Epoch 016/100 | train_loss=0.6124 train_acc=0.7879 | test_loss=0.8186 test_acc=0.6869 | lr=9.46e-04 | patience=2/25
+Epoch 017/100 | train_loss=0.6043 train_acc=0.7771 | test_loss=0.8162 test_acc=0.6886 | lr=9.38e-04 | patience=3/25
+Epoch 018/100 | train_loss=0.5817 train_acc=0.7915 | test_loss=0.8222 test_acc=0.6835 | lr=9.30e-04 | patience=4/25
+Epoch 019/100 | train_loss=0.5905 train_acc=0.7915 | test_loss=0.8222 test_acc=0.6852 | lr=9.22e-04 | patience=5/25
+Epoch 020/100 | train_loss=0.5748 train_acc=0.7994 | test_loss=0.8125 test_acc=0.6852 | lr=9.14e-04 | patience=6/25
+Epoch 021/100 | train_loss=0.5646 train_acc=0.8059 | test_loss=0.8119 test_acc=0.6970 | lr=9.05e-04 | patience=7/25
+Epoch 022/100 | train_loss=0.5671 train_acc=0.7951 | test_loss=0.8110 test_acc=0.6970 | lr=8.95e-04 | patience=8/25
+Epoch 023/100 | train_loss=0.5607 train_acc=0.8038 | test_loss=0.8109 test_acc=0.6953 | lr=8.85e-04 | patience=9/25
+Epoch 024/100 | train_loss=0.5459 train_acc=0.8095 | test_loss=0.8134 test_acc=0.6886 | lr=8.75e-04 | patience=10/25

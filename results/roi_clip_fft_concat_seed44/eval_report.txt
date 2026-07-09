@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_clip_fft_concat_seed44/best.pt
+test_loss: 0.808117
+test_acc: 0.708754
+macro_f1: 0.710098
+
+              precision    recall  f1-score   support
+
+       anger     0.7059    0.6061    0.6522        99
+     disgust     0.9032    0.8485    0.8750        99
+        fear     0.6250    0.6566    0.6404        99
+         joy     0.7075    0.7576    0.7317        99
+     sadness     0.7579    0.7273    0.7423        99
+    surprise     0.5856    0.6566    0.6190        99
+
+    accuracy                         0.7088       594
+   macro avg     0.7142    0.7088    0.7101       594
+weighted avg     0.7142    0.7088    0.7101       594
