@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from src.datasets.emotionroi import EmotionROIDataset, discover_emotionroi_splits
 from src.models import (
+    AffectSpectrumGatedClassifier,
     AffectSpectrumFiLMClassifier,
     CLIPFFTConcatClassifier,
     CLIPLinearClassifier,
@@ -98,6 +99,25 @@ def build_model(config: dict[str, Any], num_classes: int) -> nn.Module:
             spectral_hidden_dim=int(model_cfg.get("spectral_hidden_dim", 256)),
             film_scale=float(model_cfg.get("film_scale", 0.1)),
             dropout=float(model_cfg.get("dropout", 0.2)),
+        )
+    if model_name == "affectspectrum_gated":
+        return AffectSpectrumGatedClassifier(
+            num_classes=num_classes,
+            input_size=input_size,
+            model_name=model_cfg.get("clip_model", "ViT-B-16"),
+            pretrained=model_cfg.get("clip_pretrained", "openai"),
+            freeze_clip=bool(model_cfg.get("freeze_clip", True)),
+            train_last_n_blocks=int(model_cfg.get("train_last_n_blocks", 0)),
+            num_bands=int(model_cfg.get("num_bands", 6)),
+            num_orientations=int(model_cfg.get("num_orientations", 6)),
+            radial_spacing=model_cfg.get("radial_spacing", "linear"),
+            spectral_feature_dim=int(model_cfg.get("spectral_feature_dim", 256)),
+            spectral_hidden_dim=int(model_cfg.get("spectral_hidden_dim", 256)),
+            fusion_hidden_dim=int(model_cfg.get("fusion_hidden_dim", 256)),
+            gate_hidden_dim=int(model_cfg.get("gate_hidden_dim", 256)),
+            dropout=float(model_cfg.get("dropout", 0.3)),
+            residual_scale=float(model_cfg.get("residual_scale", 0.25)),
+            response_logit_scale=float(model_cfg.get("response_logit_scale", 0.1)),
         )
     raise ValueError(f"Unsupported model.name: {model_name}")
 
@@ -198,12 +218,18 @@ def main() -> int:
     y_pred: list[int] = []
     y_path: list[str] = []
     y_prob: list[list[float]] = []
+    y_gate: list[float | None] = []
+    y_response_pred: list[int | None] = []
+    y_response_prob: list[list[float] | None] = []
+    has_gate = False
+    has_response_logits = False
 
     with torch.no_grad():
         for batch in tqdm(loader, leave=False, dynamic_ncols=True, ascii=True):
             images = batch["image"].to(device, non_blocking=True)
             labels = batch["label"].to(device, non_blocking=True)
-            logits = extract_logits(model(images))
+            output = model(images)
+            logits = extract_logits(output)
             loss = criterion(logits, labels)
             batch_size = labels.size(0)
             total_loss += loss.item() * batch_size
@@ -216,6 +242,21 @@ def main() -> int:
             y_pred.extend(preds.cpu().tolist())
             y_path.extend([str(path) for path in batch["path"]])
             y_prob.extend(probs.cpu().tolist())
+            if isinstance(output, dict) and "gate" in output:
+                gate_values = output["gate"].detach().float().view(-1).cpu().tolist()
+                has_gate = True
+                y_gate.extend(gate_values)
+            else:
+                y_gate.extend([None] * batch_size)
+            if isinstance(output, dict) and "response_logits" in output:
+                response_probs = torch.softmax(output["response_logits"].float(), dim=1)
+                response_preds = response_probs.argmax(dim=1)
+                has_response_logits = True
+                y_response_pred.extend(response_preds.cpu().tolist())
+                y_response_prob.extend(response_probs.cpu().tolist())
+            else:
+                y_response_pred.extend([None] * batch_size)
+                y_response_prob.extend([None] * batch_size)
 
     test_acc = total_correct / max(total_count, 1)
     macro_f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
@@ -247,9 +288,22 @@ def main() -> int:
 
     with predictions_path.open("w", newline="", encoding="utf-8") as f:
         fieldnames = ["path", "label", "pred", "correct"] + [f"prob_{index}" for index in range(num_classes)]
+        if has_gate:
+            fieldnames.append("gate")
+        if has_response_logits:
+            fieldnames.append("response_pred")
+            fieldnames.extend(f"response_prob_{index}" for index in range(num_classes))
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for path, label, pred, probs in zip(y_path, y_true, y_pred, y_prob):
+        for path, label, pred, probs, gate, response_pred, response_probs in zip(
+            y_path,
+            y_true,
+            y_pred,
+            y_prob,
+            y_gate,
+            y_response_pred,
+            y_response_prob,
+        ):
             row = {
                 "path": path,
                 "label": label,
@@ -257,6 +311,14 @@ def main() -> int:
                 "correct": int(label == pred),
             }
             row.update({f"prob_{index}": f"{prob:.8f}" for index, prob in enumerate(probs)})
+            if has_gate:
+                row["gate"] = "" if gate is None else f"{gate:.8f}"
+            if has_response_logits:
+                row["response_pred"] = "" if response_pred is None else response_pred
+                if response_probs is None:
+                    row.update({f"response_prob_{index}": "" for index in range(num_classes)})
+                else:
+                    row.update({f"response_prob_{index}": f"{prob:.8f}" for index, prob in enumerate(response_probs)})
             writer.writerow(row)
     print(f"Saved predictions: {predictions_path}")
     return 0

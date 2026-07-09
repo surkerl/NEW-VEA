@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 from src.datasets.emotionroi import EmotionROIDataset, discover_emotionroi_splits
 from src.models import (
+    AffectSpectrumGatedClassifier,
     AffectSpectrumFiLMClassifier,
     CLIPFFTConcatClassifier,
     CLIPLinearClassifier,
@@ -113,6 +114,25 @@ def build_model(config: dict[str, Any], num_classes: int) -> nn.Module:
             film_scale=float(model_cfg.get("film_scale", 0.1)),
             dropout=float(model_cfg.get("dropout", 0.2)),
         )
+    if model_name == "affectspectrum_gated":
+        return AffectSpectrumGatedClassifier(
+            num_classes=num_classes,
+            input_size=input_size,
+            model_name=model_cfg.get("clip_model", "ViT-B-16"),
+            pretrained=model_cfg.get("clip_pretrained", "openai"),
+            freeze_clip=bool(model_cfg.get("freeze_clip", True)),
+            train_last_n_blocks=int(model_cfg.get("train_last_n_blocks", 0)),
+            num_bands=int(model_cfg.get("num_bands", 6)),
+            num_orientations=int(model_cfg.get("num_orientations", 6)),
+            radial_spacing=model_cfg.get("radial_spacing", "linear"),
+            spectral_feature_dim=int(model_cfg.get("spectral_feature_dim", 256)),
+            spectral_hidden_dim=int(model_cfg.get("spectral_hidden_dim", 256)),
+            fusion_hidden_dim=int(model_cfg.get("fusion_hidden_dim", 256)),
+            gate_hidden_dim=int(model_cfg.get("gate_hidden_dim", 256)),
+            dropout=float(model_cfg.get("dropout", 0.3)),
+            residual_scale=float(model_cfg.get("residual_scale", 0.25)),
+            response_logit_scale=float(model_cfg.get("response_logit_scale", 0.1)),
+        )
     raise ValueError(f"Unsupported model.name: {model_name}")
 
 
@@ -177,7 +197,8 @@ def run_epoch(
     optimizer: torch.optim.Optimizer | None = None,
     scaler: torch.amp.GradScaler | None = None,
     use_amp: bool = False,
-) -> tuple[float, float, bool]:
+    response_loss_weight: float = 0.0,
+) -> tuple[float, float, bool, float | None, float | None]:
     is_train = optimizer is not None
     model.train(is_train)
     if (
@@ -189,9 +210,13 @@ def run_epoch(
         model.clip_model.eval()
 
     loss_meter = AverageMeter()
+    response_loss_meter = AverageMeter()
+    gate_meter = AverageMeter()
     correct = 0
     total = 0
     optimizer_step_done = False
+    saw_response_loss = False
+    saw_gate = False
     progress = tqdm(loader, leave=False, dynamic_ncols=True, ascii=True)
 
     for batch in progress:
@@ -203,8 +228,16 @@ def run_epoch(
 
         with torch.set_grad_enabled(is_train):
             with torch.amp.autocast(device_type=device.type, enabled=use_amp):
-                logits = extract_logits(model(images))
+                output = model(images)
+                logits = extract_logits(output)
                 loss = criterion(logits, labels)
+                if isinstance(output, dict) and "response_logits" in output:
+                    response_loss = criterion(output["response_logits"], labels)
+                    saw_response_loss = True
+                    if response_loss_weight > 0.0:
+                        loss = loss + response_loss_weight * response_loss
+                else:
+                    response_loss = None
 
             if is_train:
                 assert scaler is not None
@@ -222,11 +255,23 @@ def run_epoch(
 
         batch_size = labels.size(0)
         loss_meter.update(loss.item(), batch_size)
+        if response_loss is not None:
+            response_loss_meter.update(response_loss.detach().item(), batch_size)
+        if isinstance(output, dict) and "gate" in output:
+            gate_value = output["gate"].detach().float().mean().item()
+            gate_meter.update(gate_value, batch_size)
+            saw_gate = True
         batch_correct, batch_total = accuracy_from_logits(logits.detach(), labels)
         correct += batch_correct
         total += batch_total
 
-    return loss_meter.avg, correct / max(total, 1), optimizer_step_done
+    return (
+        loss_meter.avg,
+        correct / max(total, 1),
+        optimizer_step_done,
+        response_loss_meter.avg if saw_response_loss else None,
+        gate_meter.avg if saw_gate else None,
+    )
 
 
 def checkpoint_payload(
@@ -361,17 +406,22 @@ def main() -> int:
                 "checkpoint_elapsed_sec",
                 "epoch_elapsed_sec",
                 "patience_counter",
+                "train_response_loss",
+                "test_response_loss",
+                "train_gate_mean",
+                "test_gate_mean",
             ]
         )
 
     best_acc = float("-inf")
     best_epoch = 0
     patience_counter = 0
+    response_loss_weight = float(train_cfg.get("response_loss_weight", 0.0))
 
     for epoch in range(1, epochs + 1):
         epoch_start_time = time.time()
         compute_start_time = time.time()
-        train_loss, train_acc, optimizer_step_done = run_epoch(
+        train_loss, train_acc, optimizer_step_done, train_response_loss, train_gate_mean = run_epoch(
             model,
             train_loader,
             criterion,
@@ -379,8 +429,16 @@ def main() -> int:
             optimizer=optimizer,
             scaler=scaler,
             use_amp=use_amp,
+            response_loss_weight=response_loss_weight,
         )
-        test_loss, test_acc, _ = run_epoch(model, test_loader, criterion, device, use_amp=False)
+        test_loss, test_acc, _, test_response_loss, test_gate_mean = run_epoch(
+            model,
+            test_loader,
+            criterion,
+            device,
+            use_amp=False,
+            response_loss_weight=0.0,
+        )
         compute_elapsed = time.time() - compute_start_time
         lr_value = current_lr(optimizer)
 
@@ -418,6 +476,10 @@ def main() -> int:
                     f"{checkpoint_elapsed:.3f}",
                     f"{epoch_elapsed:.3f}",
                     patience_counter,
+                    f"{train_response_loss:.6f}" if train_response_loss is not None else "",
+                    f"{test_response_loss:.6f}" if test_response_loss is not None else "",
+                    f"{train_gate_mean:.6f}" if train_gate_mean is not None else "",
+                    f"{test_gate_mean:.6f}" if test_gate_mean is not None else "",
                 ]
             )
 
@@ -427,6 +489,9 @@ def main() -> int:
             f"test_loss={test_loss:.4f} test_acc={test_acc:.4f} | "
             f"lr={lr_value:.2e} | patience={patience_counter}/{patience}"
         )
+        gate_for_log = test_gate_mean if test_gate_mean is not None else train_gate_mean
+        if gate_for_log is not None:
+            line = line.replace(f"lr={lr_value:.2e} |", f"lr={lr_value:.2e} | gate={gate_for_log:.3f} |")
         if is_best:
             line += " (new best)"
         logger.info(line)

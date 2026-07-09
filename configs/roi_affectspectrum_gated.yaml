@@ -1,0 +1,40 @@
+dataset:
+  name: emotionroi
+  root: "D:/OneDrive/Desktop/TEP-VEA/EmotionROI"
+  input_size: 224
+  use_official_split: true
+
+model:
+  name: affectspectrum_gated
+  clip_model: "ViT-B-16"
+  clip_pretrained: "openai"
+  freeze_clip: true
+  train_last_n_blocks: 0
+  num_bands: 6
+  num_orientations: 6
+  radial_spacing: "linear"
+  spectral_feature_dim: 256
+  spectral_hidden_dim: 256
+  fusion_hidden_dim: 256
+  gate_hidden_dim: 256
+  residual_scale: 0.25
+  response_logit_scale: 0.1
+  dropout: 0.3
+
+train:
+  epochs: 100
+  batch_size: 32
+  num_workers: 4
+  seed: 42
+  deterministic: true
+  amp: true
+  patience: 25
+  weight_decay: 1.0e-4
+  head_lr: 5.0e-4
+  spectral_lr: 5.0e-4
+  backbone_lr: 1.0e-5
+  min_lr: 1.0e-6
+  response_loss_weight: 0.1
+
+logging:
+  run_name: "roi_affectspectrum_gated_seed42"

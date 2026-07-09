@@ -1,0 +1,4 @@
+run_name,model,seed,best_epoch,best_acc,final_epoch,final_acc,macro_f1,early_stopped,best_ckpt,checkpoint_size_bytes,mean_epoch_time_sec,mean_checkpoint_time_sec,mean_train_gate,mean_test_gate
+roi_affectspectrum_gated_seed42,affectspectrum_gated,42,2,0.705387,27,0.70202,0.701815,True,checkpoints\roi_affectspectrum_gated_seed42\best.pt,11981221,7.928481481481481,0.01725925925925926,0.0031687407407407406,0.00041985185185185186
+roi_affectspectrum_gated_seed43,affectspectrum_gated,43,7,0.69697,32,0.681818,0.698846,True,checkpoints\roi_affectspectrum_gated_seed43\best.pt,11981221,7.81615625,0.01675,0.31519846875,0.3214795625
+roi_affectspectrum_gated_seed44,affectspectrum_gated,44,4,0.712121,29,0.708754,0.710854,True,checkpoints\roi_affectspectrum_gated_seed44\best.pt,11981221,7.699,0.017517241379310346,0.007784931034482759,0.0030667241379310345

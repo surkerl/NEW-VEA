@@ -162,6 +162,8 @@ def evaluate_perturbation(
     prediction_rows: list[dict[str, object]] = []
     class_counts = {idx: 0 for idx in idx_to_class}
     class_correct = {idx: 0 for idx in idx_to_class}
+    gate_sum = 0.0
+    gate_count = 0
 
     response_sum: torch.Tensor | None = None
     response_total = 0
@@ -214,6 +216,10 @@ def evaluate_perturbation(
                     if bool(mask.any()):
                         class_response_sum[class_idx] += response[mask, class_idx].sum(dim=0)
                         class_response_count[class_idx] += float(mask.sum().item())
+            if isinstance(output, dict) and "gate" in output:
+                gate_values = output["gate"].detach().float()
+                gate_sum += float(gate_values.sum().item())
+                gate_count += int(gate_values.numel())
 
             paths = [str(path) for path in batch["path"]]
             labels_cpu = labels.cpu().tolist()
@@ -235,6 +241,7 @@ def evaluate_perturbation(
         "acc": total_correct / max(total_count, 1),
         "macro_f1": macro_f1,
         "num_samples": total_count,
+        "mean_gate": gate_sum / gate_count if gate_count > 0 else "",
     }
     per_class_rows = [
         {
@@ -319,6 +326,10 @@ def run_evidence_accumulation(
                 probs = torch.softmax(logits.float(), dim=1)
                 entropy = entropy_from_probs(probs)
                 preds = probs.argmax(dim=1)
+                if isinstance(output, dict) and "gate" in output:
+                    gate_values = output["gate"].detach().float().view(-1).cpu().tolist()
+                else:
+                    gate_values = [None] * labels.size(0)
                 gt_probs = probs.gather(1, labels.view(-1, 1)).squeeze(1)
                 pred_probs = probs.gather(1, preds.view(-1, 1)).squeeze(1)
                 labels_cpu = labels.cpu().tolist()
@@ -326,8 +337,8 @@ def run_evidence_accumulation(
                 gt_cpu = gt_probs.cpu().tolist()
                 pred_cpu = pred_probs.cpu().tolist()
                 entropy_cpu = entropy.cpu().tolist()
-                for path, label, pred, gt_prob, pred_prob, entropy_value in zip(
-                    paths, labels_cpu, preds_cpu, gt_cpu, pred_cpu, entropy_cpu
+                for path, label, pred, gt_prob, pred_prob, entropy_value, gate_value in zip(
+                    paths, labels_cpu, preds_cpu, gt_cpu, pred_cpu, entropy_cpu, gate_values
                 ):
                     correct = int(label == pred)
                     sample_rows.append(
@@ -341,6 +352,7 @@ def run_evidence_accumulation(
                             "pred": pred,
                             "correct": correct,
                             "entropy": entropy_value,
+                            "gate": "" if gate_value is None else gate_value,
                         }
                     )
                     key = (int(label), stage_name)
@@ -437,7 +449,7 @@ def main() -> int:
             seed=int(args.seed),
             idx_to_class=idx_to_class,
             perturbation_index=index,
-            collect_response=name == "full" and run_model == "film",
+            collect_response=name == "full",
         )
         metric_rows.append(metric_row)
         per_class_rows.extend(class_rows)

@@ -133,6 +133,36 @@ results/phase3b_spectral_probe/
 results/phase3_spectral_diagnostics_summary.md
 ```
 
+## Phase 4: AffectSpectrum-Gated v1
+
+Phase 4 moves from Phase 3 diagnosis to explicit spectral response learning. It explicitly models emotion-specific spectral responses and learns a sample-level spectral evidence gate.
+
+The model contains:
+
+- Semantic Readout Path: frozen CLIP visual feature.
+- Spectral Presentation Encoder: normalized radial-orientation spectral presentation encoding.
+- Emotion-Specific Spectral Response: response maps and response logits supervised with auxiliary CE.
+- Spectral Evidence Gate: scalar sample-level gate for how much spectral evidence to inject.
+- Gated Evidence Fusion: preserves CLIP semantic evidence while gate-controlling spectral residual evidence.
+
+CLIP remains frozen by default. EmotionROI still follows the official train/test protocol: no validation split is used, best checkpoints are selected by official `test_acc`, and early stopping monitors official `test_acc`.
+
+Run Phase 4:
+
+```powershell
+.\scripts\run_roi_phase4_gated.ps1
+```
+
+Main outputs:
+
+```text
+results/phase4_gated_summary.csv
+results/phase4_gated_aggregate.csv
+results/phase4_gated_error_overlap.csv
+results/phase4_gated_probe_comparison.csv
+results/phase4_gated_summary.md
+```
+
 ## Key Defaults
 
 - CLIP backbone: `ViT-B-16`

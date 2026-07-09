@@ -10,12 +10,16 @@ class RadialOrientationSpectrum(nn.Module):
         input_size: int = 224,
         num_bands: int = 6,
         num_orientations: int = 6,
+        radial_spacing: str = "linear",
         eps: float = 1.0e-6,
     ) -> None:
         super().__init__()
         self.input_size = int(input_size)
         self.num_bands = int(num_bands)
         self.num_orientations = int(num_orientations)
+        self.radial_spacing = str(radial_spacing).lower()
+        if self.radial_spacing not in {"linear", "log"}:
+            raise ValueError(f"Unsupported radial_spacing: {radial_spacing}")
         self.eps = float(eps)
         self.extra_feature_dim = 9
         self.output_dim = self.num_bands * self.num_orientations + self.extra_feature_dim
@@ -96,7 +100,18 @@ class RadialOrientationSpectrum(nn.Module):
         valid = radius > 0
 
         max_radius = radius.max().clamp_min(1.0)
-        radial_edges = torch.linspace(0.0, float(max_radius), self.num_bands + 1)
+        if self.radial_spacing == "log":
+            normalized_edges = torch.logspace(
+                math.log10(self.eps),
+                0.0,
+                self.num_bands + 1,
+                dtype=torch.float32,
+            )
+            normalized_edges[0] = 0.0
+            normalized_edges[-1] = 1.0
+            radial_edges = normalized_edges * max_radius
+        else:
+            radial_edges = torch.linspace(0.0, float(max_radius), self.num_bands + 1)
         radial_masks = []
         for band_idx in range(self.num_bands):
             lower = radial_edges[band_idx]

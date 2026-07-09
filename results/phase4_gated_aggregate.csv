@@ -1,0 +1,2 @@
+model,num_seeds,mean_best_acc,std_best_acc,mean_macro_f1,std_macro_f1,mean_best_epoch,win_count_vs_baseline_lr5e4,win_count_vs_concat,mean_delta_vs_baseline_lr5e4,mean_delta_vs_concat,mean_gate
+affectspectrum_gated,3,0.704826,0.007591063232512307,0.7038383333333333,0.006254472346516008,4.333333333333333,2,1,0.006734000000000018,-0.0005609999999999967,0.10832204616326095

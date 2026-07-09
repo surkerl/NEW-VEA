@@ -1,0 +1,36 @@
+Run: roi_affectspectrum_gated_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Epoch 001/100 | train_loss=1.4203 train_acc=0.5375 | test_loss=0.8895 test_acc=0.6700 | lr=5.00e-04 | gate=0.007 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=0.9860 train_acc=0.7035 | test_loss=0.8215 test_acc=0.7054 | lr=5.00e-04 | gate=0.001 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=0.8881 train_acc=0.7280 | test_loss=0.9029 test_acc=0.6566 | lr=5.00e-04 | gate=0.000 | patience=1/25
+Epoch 004/100 | train_loss=0.8112 train_acc=0.7532 | test_loss=0.7966 test_acc=0.7003 | lr=4.99e-04 | gate=0.000 | patience=2/25
+Epoch 005/100 | train_loss=0.7741 train_acc=0.7864 | test_loss=0.8225 test_acc=0.6953 | lr=4.98e-04 | gate=0.000 | patience=3/25
+Epoch 006/100 | train_loss=0.7075 train_acc=0.8081 | test_loss=0.8139 test_acc=0.6869 | lr=4.97e-04 | gate=0.000 | patience=4/25
+Epoch 007/100 | train_loss=0.6886 train_acc=0.8066 | test_loss=0.8669 test_acc=0.6751 | lr=4.96e-04 | gate=0.000 | patience=5/25
+Epoch 008/100 | train_loss=0.6561 train_acc=0.8203 | test_loss=0.8339 test_acc=0.6970 | lr=4.94e-04 | gate=0.001 | patience=6/25
+Epoch 009/100 | train_loss=0.6467 train_acc=0.8312 | test_loss=0.8258 test_acc=0.6869 | lr=4.92e-04 | gate=0.000 | patience=7/25
+Epoch 010/100 | train_loss=0.6136 train_acc=0.8442 | test_loss=0.8389 test_acc=0.6801 | lr=4.90e-04 | gate=0.000 | patience=8/25
+Epoch 011/100 | train_loss=0.5781 train_acc=0.8586 | test_loss=0.8597 test_acc=0.6970 | lr=4.88e-04 | gate=0.000 | patience=9/25
+Epoch 012/100 | train_loss=0.5406 train_acc=0.8737 | test_loss=0.9213 test_acc=0.6818 | lr=4.85e-04 | gate=0.000 | patience=10/25
+Epoch 013/100 | train_loss=0.5500 train_acc=0.8550 | test_loss=0.8985 test_acc=0.6886 | lr=4.82e-04 | gate=0.000 | patience=11/25
+Epoch 014/100 | train_loss=0.5146 train_acc=0.8766 | test_loss=0.9102 test_acc=0.6886 | lr=4.79e-04 | gate=0.000 | patience=12/25
+Epoch 015/100 | train_loss=0.4790 train_acc=0.8918 | test_loss=0.9433 test_acc=0.6869 | lr=4.76e-04 | gate=0.000 | patience=13/25
+Epoch 016/100 | train_loss=0.4651 train_acc=0.9040 | test_loss=0.9233 test_acc=0.6734 | lr=4.73e-04 | gate=0.000 | patience=14/25
+Epoch 017/100 | train_loss=0.4572 train_acc=0.8918 | test_loss=0.9710 test_acc=0.6852 | lr=4.69e-04 | gate=0.000 | patience=15/25
+Epoch 018/100 | train_loss=0.4186 train_acc=0.9163 | test_loss=0.9923 test_acc=0.6700 | lr=4.65e-04 | gate=0.000 | patience=16/25
+Epoch 019/100 | train_loss=0.4070 train_acc=0.9221 | test_loss=0.9592 test_acc=0.6953 | lr=4.61e-04 | gate=0.000 | patience=17/25
+Epoch 020/100 | train_loss=0.3955 train_acc=0.9206 | test_loss=0.9637 test_acc=0.6835 | lr=4.57e-04 | gate=0.000 | patience=18/25
+Epoch 021/100 | train_loss=0.3702 train_acc=0.9380 | test_loss=1.0211 test_acc=0.6785 | lr=4.52e-04 | gate=0.000 | patience=19/25
+Epoch 022/100 | train_loss=0.3573 train_acc=0.9408 | test_loss=0.9894 test_acc=0.6852 | lr=4.48e-04 | gate=0.000 | patience=20/25
+Epoch 023/100 | train_loss=0.3654 train_acc=0.9343 | test_loss=1.0022 test_acc=0.6835 | lr=4.43e-04 | gate=0.000 | patience=21/25
+Epoch 024/100 | train_loss=0.3505 train_acc=0.9452 | test_loss=0.9999 test_acc=0.6919 | lr=4.38e-04 | gate=0.000 | patience=22/25
+Epoch 025/100 | train_loss=0.3289 train_acc=0.9596 | test_loss=1.0401 test_acc=0.6902 | lr=4.32e-04 | gate=0.000 | patience=23/25
+Epoch 026/100 | train_loss=0.3190 train_acc=0.9545 | test_loss=1.0562 test_acc=0.6869 | lr=4.27e-04 | gate=0.000 | patience=24/25
+Epoch 027/100 | train_loss=0.3016 train_acc=0.9646 | test_loss=1.0792 test_acc=0.7020 | lr=4.21e-04 | gate=0.000 | patience=25/25
+Early stopping triggered at epoch 27.
+best_acc=0.7054
+best_epoch=2
+best_checkpoint=checkpoints\roi_affectspectrum_gated_seed42\best.pt
+log_path=logs\roi_affectspectrum_gated_seed42.log

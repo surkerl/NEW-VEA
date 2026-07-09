@@ -1,0 +1,7 @@
+seed,comparison,both_correct,reference_correct_gated_wrong,reference_wrong_gated_correct,both_wrong_same_pred,both_wrong_different_pred,net_corrections
+42,baseline_vs_gated,384,30,35,130,15,5
+42,concat_vs_gated,392,27,27,133,15,0
+43,baseline_vs_gated,385,30,29,132,18,-1
+43,concat_vs_gated,371,46,43,110,24,-3
+44,baseline_vs_gated,397,18,26,133,20,8
+44,concat_vs_gated,399,22,24,134,15,2

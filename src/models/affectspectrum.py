@@ -106,6 +106,30 @@ class FrequencyOnlyClassifier(nn.Module):
         return self.classifier(spectral["spectral_vec"])
 
 
+class SpectralPresentationEncoder(nn.Module):
+    def __init__(
+        self,
+        spectral_input_dim: int,
+        spectral_feature_dim: int = 256,
+        hidden_dim: int = 256,
+        dropout: float = 0.2,
+    ) -> None:
+        super().__init__()
+        self.encoder = nn.Sequential(
+            nn.LayerNorm(spectral_input_dim),
+            nn.Linear(spectral_input_dim, hidden_dim),
+            nn.GELU(),
+            nn.Dropout(p=dropout),
+            nn.Linear(hidden_dim, spectral_feature_dim),
+            nn.GELU(),
+            nn.LayerNorm(spectral_feature_dim),
+        )
+
+    def forward(self, spectral_vec: torch.Tensor, spectral_map: torch.Tensor) -> torch.Tensor:
+        del spectral_map
+        return self.encoder(spectral_vec)
+
+
 class CLIPFFTConcatClassifier(_FrozenClipMixin, nn.Module):
     def __init__(
         self,
@@ -209,4 +233,123 @@ class AffectSpectrumFiLMClassifier(_FrozenClipMixin, nn.Module):
             "logits": logits,
             "response_map": response_map,
             "spectral_map": spectral["spectral_map"],
+        }
+
+
+class AffectSpectrumGatedClassifier(_FrozenClipMixin, nn.Module):
+    def __init__(
+        self,
+        num_classes: int,
+        input_size: int = 224,
+        model_name: str = "ViT-B-16",
+        pretrained: str = "openai",
+        freeze_clip: bool = True,
+        train_last_n_blocks: int = 0,
+        num_bands: int = 6,
+        num_orientations: int = 6,
+        radial_spacing: str = "linear",
+        spectral_feature_dim: int = 256,
+        spectral_hidden_dim: int = 256,
+        fusion_hidden_dim: int = 256,
+        gate_hidden_dim: int = 256,
+        dropout: float = 0.3,
+        residual_scale: float = 0.25,
+        response_logit_scale: float = 0.1,
+    ) -> None:
+        super().__init__()
+        self.num_classes = int(num_classes)
+        self.num_bands = int(num_bands)
+        self.num_orientations = int(num_orientations)
+        self.residual_scale = float(residual_scale)
+        self.response_logit_scale = float(response_logit_scale)
+
+        clip_dim = self._init_clip(model_name, pretrained, freeze_clip, train_last_n_blocks)
+        self.spectrum = RadialOrientationSpectrum(
+            input_size=input_size,
+            num_bands=num_bands,
+            num_orientations=num_orientations,
+            radial_spacing=radial_spacing,
+        )
+        self.sem_norm = nn.LayerNorm(clip_dim)
+        self.spectral_encoder = SpectralPresentationEncoder(
+            spectral_input_dim=self.spectrum.output_dim,
+            spectral_feature_dim=spectral_feature_dim,
+            hidden_dim=spectral_hidden_dim,
+            dropout=dropout,
+        )
+        self.spectral_to_sem = nn.Linear(spectral_feature_dim, clip_dim)
+        self.spectral_sem_norm = nn.LayerNorm(clip_dim)
+        self.response_head = nn.Linear(
+            spectral_feature_dim,
+            self.num_classes * self.num_bands * self.num_orientations,
+        )
+        self.gate_mlp = nn.Sequential(
+            nn.Linear(3 * clip_dim + self.num_classes, gate_hidden_dim),
+            nn.GELU(),
+            nn.Dropout(p=dropout),
+            nn.Linear(gate_hidden_dim, 1),
+            nn.Sigmoid(),
+        )
+        fusion_input_dim = clip_dim + spectral_feature_dim + clip_dim + self.num_classes
+        self.classifier = nn.Sequential(
+            nn.LayerNorm(fusion_input_dim),
+            nn.Dropout(p=dropout),
+            nn.Linear(fusion_input_dim, fusion_hidden_dim),
+            nn.GELU(),
+            nn.Dropout(p=dropout),
+            nn.Linear(fusion_hidden_dim, self.num_classes),
+        )
+        self._has_trainable_backbone = any(param.requires_grad for param in self.clip_model.parameters())
+
+    def forward(self, images: torch.Tensor) -> dict[str, torch.Tensor]:
+        z_sem = self._encode_image(images)
+        sem_norm = self.sem_norm(z_sem)
+
+        spectral = self.spectrum(images)
+        spectral_map = spectral["spectral_map"]
+        z_spec = self.spectral_encoder(spectral["spectral_vec"], spectral_map)
+        z_spec_sem = self.spectral_sem_norm(self.spectral_to_sem(z_spec))
+
+        batch_size = images.size(0)
+        response_map = self.response_head(z_spec).view(
+            batch_size,
+            self.num_classes,
+            self.num_bands,
+            self.num_orientations,
+        )
+        energy = spectral_map.reshape(batch_size, self.num_bands * self.num_orientations)
+        energy = energy / (energy.sum(dim=1, keepdim=True) + 1.0e-6)
+        response_flat = response_map.reshape(batch_size, self.num_classes, self.num_bands * self.num_orientations)
+        response_logits = (response_flat * energy.unsqueeze(1)).sum(dim=-1)
+
+        gate_input = torch.cat(
+            [
+                sem_norm,
+                z_spec_sem,
+                sem_norm * z_spec_sem,
+                response_logits,
+            ],
+            dim=-1,
+        )
+        gate = self.gate_mlp(gate_input)
+        z_gated = sem_norm + self.residual_scale * gate * z_spec_sem
+        fusion_input = torch.cat(
+            [
+                sem_norm,
+                z_spec,
+                z_gated,
+                response_logits,
+            ],
+            dim=-1,
+        )
+        logits_main = self.classifier(fusion_input)
+        logits = logits_main + self.response_logit_scale * response_logits
+
+        return {
+            "logits": logits,
+            "logits_main": logits_main,
+            "response_logits": response_logits,
+            "response_map": response_map,
+            "spectral_map": spectral_map,
+            "gate": gate,
         }

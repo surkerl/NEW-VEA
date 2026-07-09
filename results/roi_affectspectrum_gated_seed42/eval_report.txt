@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_affectspectrum_gated_seed42/best.pt
+test_loss: 0.821486
+test_acc: 0.705387
+macro_f1: 0.701815
+
+              precision    recall  f1-score   support
+
+       anger     0.7966    0.4747    0.5949        99
+     disgust     0.8737    0.8384    0.8557        99
+        fear     0.6495    0.6364    0.6429        99
+         joy     0.7282    0.7576    0.7426        99
+     sadness     0.6693    0.8586    0.7522        99
+    surprise     0.5841    0.6667    0.6226        99
+
+    accuracy                         0.7054       594
+   macro avg     0.7169    0.7054    0.7018       594
+weighted avg     0.7169    0.7054    0.7018       594
