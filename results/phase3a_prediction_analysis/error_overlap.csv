@@ -1,0 +1,7 @@
+seed,comparison,both_correct,baseline_correct_model_wrong,baseline_wrong_model_correct,both_wrong_same_pred,both_wrong_different_pred,net_corrections
+42,baseline_vs_concat,389,25,30,132,18,5
+42,baseline_vs_film,386,28,31,129,20,3
+43,baseline_vs_concat,392,23,25,141,13,2
+43,baseline_vs_film,401,14,17,156,6,3
+44,baseline_vs_concat,402,13,19,152,8,6
+44,baseline_vs_film,392,23,21,145,13,-2

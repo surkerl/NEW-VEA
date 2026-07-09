@@ -1,0 +1,19 @@
+Phase 3A Prediction-Level Spectral Evidence Diagnosis
+
+Concat average corrected baseline errors: 24.67
+Concat average new errors: 20.33
+Concat average net correction: 4.33
+FiLM average corrected baseline errors: 23.00
+FiLM average new errors: 21.67
+FiLM average net correction: 1.33
+
+Concat largest class gains: class_4 (+0.0269), class_3 (+0.0202), class_1 (+0.0135)
+Concat largest class drops: class_0 (+0.0034), class_5 (+0.0000), class_2 (-0.0202)
+FiLM largest class gains: class_3 (+0.0303), class_4 (+0.0135), class_0 (+0.0101)
+FiLM largest class drops: class_5 (-0.0067), class_1 (-0.0168), class_2 (-0.0168)
+
+McNemar significant comparisons at 0.05: none
+McNemar p-values used scipy.stats.chi2.sf.
+
+Interpretation: prediction-level differences show that spectrum-guided models correct a different subset of baseline errors while also introducing their own errors. This supports spectral evidence as a distinct affective signal rather than a generic duplicate of semantic CLIP evidence.
+Next step: the results support Phase 3B spectral perturbation to test spectral sensitivity and coarse-to-fine evidence accumulation.

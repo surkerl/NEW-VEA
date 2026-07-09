@@ -1,0 +1,7 @@
+seed,comparison,b_baseline_correct_model_wrong,c_baseline_wrong_model_correct,chi2,p_value,significant_0_05
+42,baseline_vs_concat,25,30,0.2909090909090909,0.5896385516265671,False
+42,baseline_vs_film,28,31,0.06779661016949153,0.7945723486232792,False
+43,baseline_vs_concat,23,25,0.020833333333333332,0.8852339144732015,False
+43,baseline_vs_film,14,17,0.12903225806451613,0.7194375444233914,False
+44,baseline_vs_concat,13,19,0.78125,0.3767591178115821,False
+44,baseline_vs_film,23,21,0.022727272727272728,0.8801684549067255,False

@@ -105,6 +105,34 @@ Evaluation writes:
 results/roi_clip_baseline_seed42/eval_report.txt
 ```
 
+## Phase 3: Spectral Evidence Diagnosis
+
+Phase 3 does not train new models. It evaluates whether spectral presentation evidence provides a distinct affective signal beyond semantic visual representations.
+
+Phase 3A analyzes prediction-level error differences across the Phase 2.5 fairness runs. It aligns `predictions.csv` by image path and reports per-class changes, corrected baseline errors, newly introduced errors, McNemar tests, and confusion matrices.
+
+Phase 3B analyzes spectral perturbation robustness on the official EmotionROI test split. It probes low-pass, high-pass, band-pass, blur, downsample, amplitude-noise, and phase-noise variants, then records coarse-to-fine spectral evidence accumulation from `low_0.15` to `full`.
+
+The diagnostic target is:
+
+- spectral evidence differs from semantic evidence;
+- affective evidence emerges across frequency bands;
+- spectrum-guided models use spectral presentation cues.
+
+Run the complete diagnosis:
+
+```powershell
+.\scripts\run_roi_phase3_spectral_diagnostics.ps1
+```
+
+Main outputs:
+
+```text
+results/phase3a_prediction_analysis/
+results/phase3b_spectral_probe/
+results/phase3_spectral_diagnostics_summary.md
+```
+
 ## Key Defaults
 
 - CLIP backbone: `ViT-B-16`
@@ -118,4 +146,3 @@ results/roi_clip_baseline_seed42/eval_report.txt
 - AMP: enabled on CUDA, disabled on CPU
 - seed: `42`
 - early stopping patience: `25`
-# NEW-VEA

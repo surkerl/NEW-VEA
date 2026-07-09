@@ -1,10 +1,28 @@
+# Datasets and archives
+EmotionROI/
+FI/
+EmoSet/
+data/
+datasets/
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+
+# Model checkpoints and weights
+checkpoints/
+!checkpoints/.gitkeep
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+
+# Python cache
 __pycache__/
 *.py[cod]
-
-# Keep training logs/results, but do not commit model weights.
-checkpoints/**/*.pt
-checkpoints/**/*.pth
-checkpoints/**/*.ckpt
+.pytest_cache/
 
 # Background process plumbing used by local runs.
 logs/*_process.out
@@ -16,6 +34,7 @@ logs/smoke*.log
 logs/repro*.log
 results/smoke*/
 results/repro*/
+results/phase3b_spectral_probe/smoke*/
 
 .env
 .venv/
