@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_spectral_global_filter_adapter_seed42/best.pt
+test_loss: 1.121027
+test_acc: 0.668350
+macro_f1: 0.672112
+
+              precision    recall  f1-score   support
+
+       anger     0.6186    0.6061    0.6122        99
+     disgust     0.9250    0.7475    0.8268        99
+        fear     0.5895    0.5657    0.5773        99
+         joy     0.7059    0.7273    0.7164        99
+     sadness     0.7216    0.7071    0.7143        99
+    surprise     0.5285    0.6566    0.5856        99
+
+    accuracy                         0.6684       594
+   macro avg     0.6815    0.6684    0.6721       594
+weighted avg     0.6815    0.6684    0.6721       594

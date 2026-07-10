@@ -1,0 +1,32 @@
+Run: roi_spectral_factorized_filter_adapter_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Parameters: total=150237447 frozen_clip=149620737 adapters=613632 classifier=3078 trainable=616710
+Phase 7 adapter parameter max/min ratio=1.117
+Epoch 001/100 | train_loss=1.6243 train_acc=0.3939 | test_loss=1.4147 test_acc=0.5926 | lr=1.00e-03 | adapter=0.0377 gamma=0.011156 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=1.2134 train_acc=0.6364 | test_loss=1.1155 test_acc=0.6431 | lr=1.00e-03 | adapter=0.2537 gamma=0.019059 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=0.9762 train_acc=0.6847 | test_loss=1.0084 test_acc=0.6549 | lr=9.99e-04 | adapter=0.2604 gamma=0.019962 | patience=0/25 (new best)
+Epoch 004/100 | train_loss=0.8580 train_acc=0.7071 | test_loss=0.9409 test_acc=0.6751 | lr=9.98e-04 | adapter=0.2900 gamma=0.021084 | patience=0/25 (new best)
+Epoch 005/100 | train_loss=0.7772 train_acc=0.7489 | test_loss=0.9205 test_acc=0.6549 | lr=9.96e-04 | adapter=0.2832 gamma=0.022296 | patience=1/25
+Epoch 006/100 | train_loss=0.7132 train_acc=0.7633 | test_loss=0.8671 test_acc=0.6919 | lr=9.94e-04 | adapter=0.2963 gamma=0.023597 | patience=0/25 (new best)
+Epoch 007/100 | train_loss=0.6500 train_acc=0.7835 | test_loss=0.8786 test_acc=0.6734 | lr=9.91e-04 | adapter=0.3030 gamma=0.024966 | patience=1/25
+Epoch 008/100 | train_loss=0.6235 train_acc=0.7879 | test_loss=0.8574 test_acc=0.6852 | lr=9.88e-04 | adapter=0.3053 gamma=0.026284 | patience=2/25
+Epoch 009/100 | train_loss=0.5614 train_acc=0.8153 | test_loss=0.8583 test_acc=0.6987 | lr=9.84e-04 | adapter=0.3042 gamma=0.027768 | patience=0/25 (new best)
+Epoch 010/100 | train_loss=0.5285 train_acc=0.8225 | test_loss=0.8607 test_acc=0.6717 | lr=9.80e-04 | adapter=0.3107 gamma=0.029106 | patience=1/25
+Epoch 011/100 | train_loss=0.4909 train_acc=0.8362 | test_loss=0.9098 test_acc=0.6582 | lr=9.76e-04 | adapter=0.3290 gamma=0.030885 | patience=2/25
+Epoch 012/100 | train_loss=0.4528 train_acc=0.8492 | test_loss=0.8753 test_acc=0.6768 | lr=9.70e-04 | adapter=0.3190 gamma=0.032376 | patience=3/25
+Epoch 013/100 | train_loss=0.4114 train_acc=0.8629 | test_loss=0.9129 test_acc=0.6414 | lr=9.65e-04 | adapter=0.3264 gamma=0.033766 | patience=4/25
+Epoch 014/100 | train_loss=0.3784 train_acc=0.8831 | test_loss=0.9138 test_acc=0.6650 | lr=9.59e-04 | adapter=0.3163 gamma=0.035358 | patience=5/25
+Epoch 015/100 | train_loss=0.3325 train_acc=0.8939 | test_loss=0.9296 test_acc=0.6549 | lr=9.52e-04 | adapter=0.3210 gamma=0.036759 | patience=6/25
+Epoch 016/100 | train_loss=0.2941 train_acc=0.9091 | test_loss=0.9260 test_acc=0.6768 | lr=9.46e-04 | adapter=0.3111 gamma=0.037991 | patience=7/25
+Epoch 017/100 | train_loss=0.2648 train_acc=0.9242 | test_loss=0.9694 test_acc=0.6616 | lr=9.38e-04 | adapter=0.3336 gamma=0.039580 | patience=8/25
+Epoch 018/100 | train_loss=0.2190 train_acc=0.9372 | test_loss=1.0059 test_acc=0.6448 | lr=9.30e-04 | adapter=0.3271 gamma=0.041022 | patience=9/25
+Epoch 019/100 | train_loss=0.1977 train_acc=0.9437 | test_loss=1.0401 test_acc=0.6448 | lr=9.22e-04 | adapter=0.3287 gamma=0.042187 | patience=10/25
+Epoch 020/100 | train_loss=0.1646 train_acc=0.9661 | test_loss=1.0363 test_acc=0.6566 | lr=9.14e-04 | adapter=0.3335 gamma=0.043401 | patience=11/25
+Epoch 021/100 | train_loss=0.1349 train_acc=0.9675 | test_loss=1.0977 test_acc=0.6397 | lr=9.05e-04 | adapter=0.3372 gamma=0.044551 | patience=12/25
+Manual Early stopping triggered at epoch 21 after sustained overfitting.
+best_acc=0.6987
+best_epoch=9
+best_checkpoint=checkpoints\roi_spectral_factorized_filter_adapter_seed42\best.pt
+log_path=logs\roi_spectral_factorized_filter_adapter_seed42.log

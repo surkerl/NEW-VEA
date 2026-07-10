@@ -16,6 +16,7 @@ from src.models import (
     CLIPFFTConcatClassifier,
     CLIPLinearClassifier,
     FrequencyOnlyClassifier,
+    InternalAdapterCLIPClassifier,
 )
 from src.utils.checkpoint import load_checkpoint
 from src.utils.config import load_config, set_nested
@@ -119,6 +120,27 @@ def build_model(config: dict[str, Any], num_classes: int) -> nn.Module:
             residual_scale=float(model_cfg.get("residual_scale", 0.25)),
             response_logit_scale=float(model_cfg.get("response_logit_scale", 0.1)),
         )
+    internal_adapter_types = {
+        "spatial_token_adapter": "spatial",
+        "spectral_global_filter_adapter": "global_filter",
+        "spectral_factorized_filter_adapter": "factorized_filter",
+        "wavelet_token_adapter": "wavelet",
+    }
+    if model_name in internal_adapter_types:
+        return InternalAdapterCLIPClassifier(
+            num_classes=num_classes,
+            clip_model=model_cfg.get("clip_model", "ViT-B-16"),
+            clip_pretrained=model_cfg.get("clip_pretrained", "openai"),
+            freeze_clip=bool(model_cfg.get("freeze_clip", True)),
+            adapter_type=internal_adapter_types[model_name],
+            adapter_indices=model_cfg.get("adapter_indices", [3, 7, 11]),
+            bottleneck_dim=int(model_cfg.get("bottleneck_dim", 128)),
+            dropout=float(model_cfg.get("dropout", 0.2)),
+            adapter_dropout=float(model_cfg.get("adapter_dropout", 0.1)),
+            layer_scale_init=float(model_cfg.get("layer_scale_init", 1.0e-4)),
+            radial_bands=int(model_cfg.get("radial_bands", 6)),
+            orientation_bins=int(model_cfg.get("orientation_bins", 6)),
+        )
     raise ValueError(f"Unsupported model.name: {model_name}")
 
 
@@ -126,6 +148,35 @@ def extract_logits(output: torch.Tensor | dict[str, torch.Tensor]) -> torch.Tens
     if isinstance(output, dict):
         return output["logits"]
     return output
+
+
+ADAPTER_DIAGNOSTIC_FIELDS = {
+    "adapter_residual_abs_mean": ("adapter_residual_abs_mean", True),
+    "adapter_residual_norm": ("adapter_residual_norm", True),
+    "layer_scale_mean": ("adapter_layer_scales", False),
+    "global_filter_abs_mean": ("global_filter_abs_mean", False),
+    "global_filter_low_mean": ("global_filter_low_mean", False),
+    "global_filter_mid_mean": ("global_filter_mid_mean", False),
+    "global_filter_high_mean": ("global_filter_high_mean", False),
+    "factorized_coeff_abs_mean": ("factorized_coeff_abs_mean", False),
+    "wavelet_ll_scale": ("wavelet_ll_scale", False),
+    "wavelet_lh_scale": ("wavelet_lh_scale", False),
+    "wavelet_hl_scale": ("wavelet_hl_scale", False),
+    "wavelet_hh_scale": ("wavelet_hh_scale", False),
+}
+
+
+def diagnostic_values(
+    value: torch.Tensor,
+    batch_size: int,
+    per_sample: bool,
+) -> list[float]:
+    value = value.detach().float()
+    if per_sample:
+        if value.ndim == 0 or value.shape[0] != batch_size:
+            raise RuntimeError(f"Expected per-sample diagnostic for batch size {batch_size}, found {tuple(value.shape)}.")
+        return value.reshape(batch_size, -1).mean(dim=1).cpu().tolist()
+    return [value.mean().item()] * batch_size
 
 
 def load_checkpoint_state(model: nn.Module, checkpoint: dict[str, Any]) -> None:
@@ -221,6 +272,10 @@ def main() -> int:
     y_gate: list[float | None] = []
     y_response_pred: list[int | None] = []
     y_response_prob: list[list[float] | None] = []
+    y_adapter_diagnostics: dict[str, list[float | None]] = {
+        field: [] for field in ADAPTER_DIAGNOSTIC_FIELDS
+    }
+    has_adapter_diagnostic = {field: False for field in ADAPTER_DIAGNOSTIC_FIELDS}
     has_gate = False
     has_response_logits = False
 
@@ -257,6 +312,13 @@ def main() -> int:
             else:
                 y_response_pred.extend([None] * batch_size)
                 y_response_prob.extend([None] * batch_size)
+            for field, (output_key, per_sample) in ADAPTER_DIAGNOSTIC_FIELDS.items():
+                if isinstance(output, dict) and output_key in output:
+                    values = diagnostic_values(output[output_key], batch_size, per_sample)
+                    y_adapter_diagnostics[field].extend(values)
+                    has_adapter_diagnostic[field] = True
+                else:
+                    y_adapter_diagnostics[field].extend([None] * batch_size)
 
     test_acc = total_correct / max(total_count, 1)
     macro_f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
@@ -293,16 +355,21 @@ def main() -> int:
         if has_response_logits:
             fieldnames.append("response_pred")
             fieldnames.extend(f"response_prob_{index}" for index in range(num_classes))
+        fieldnames.extend(
+            field for field, present in has_adapter_diagnostic.items() if present
+        )
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        for path, label, pred, probs, gate, response_pred, response_probs in zip(
-            y_path,
-            y_true,
-            y_pred,
-            y_prob,
-            y_gate,
-            y_response_pred,
-            y_response_prob,
+        for row_index, (path, label, pred, probs, gate, response_pred, response_probs) in enumerate(
+            zip(
+                y_path,
+                y_true,
+                y_pred,
+                y_prob,
+                y_gate,
+                y_response_pred,
+                y_response_prob,
+            )
         ):
             row = {
                 "path": path,
@@ -319,6 +386,10 @@ def main() -> int:
                     row.update({f"response_prob_{index}": "" for index in range(num_classes)})
                 else:
                     row.update({f"response_prob_{index}": f"{prob:.8f}" for index, prob in enumerate(response_probs)})
+            for field, present in has_adapter_diagnostic.items():
+                if present:
+                    value = y_adapter_diagnostics[field][row_index]
+                    row[field] = "" if value is None else f"{value:.8f}"
             writer.writerow(row)
     print(f"Saved predictions: {predictions_path}")
     return 0

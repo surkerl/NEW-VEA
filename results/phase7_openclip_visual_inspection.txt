@@ -1,0 +1,28 @@
+open_clip_version: 3.3.0
+device: cuda
+visual_class: VisionTransformer
+visual.width: <missing>
+visual.width_inferred: 768
+visual.patch_size: (16, 16)
+visual.grid_size: (14, 14)
+visual.output_dim: 512
+visual.has_attr._embeds: True
+visual.has_attr.transformer: True
+visual.has_attr._pool: True
+visual.has_attr.proj: True
+visual.has_transformer.resblocks: True
+transformer.batch_first: True
+resblocks_count: 12
+block_0_class: ResidualAttentionBlock
+block_1_class: ResidualAttentionBlock
+block_2_class: ResidualAttentionBlock
+block_last_class: ResidualAttentionBlock
+embeds_shape: (2, 197, 768)
+token_count: 197
+patch_token_count: 196
+is_1_cls_plus_196_spatial: True
+encode_image_shape: (2, 512)
+manual_output_shape: (2, 512)
+max_abs_diff: 0.0000000000e+00
+mean_abs_diff: 0.0000000000e+00
+manual_forward_parity_passed: True

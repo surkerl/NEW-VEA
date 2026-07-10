@@ -5,6 +5,13 @@ from .affectspectrum import (
     CLIPFFTConcatClassifier,
     FrequencyOnlyClassifier,
 )
+from .internal_spectral_adapters import (
+    FactorizedSpectralTokenAdapter,
+    GlobalFilterTokenAdapter,
+    InternalAdapterCLIPClassifier,
+    SpatialTokenAdapter,
+    WaveletTokenAdapter,
+)
 
 __all__ = [
     "AffectSpectrumGatedClassifier",
@@ -12,4 +19,9 @@ __all__ = [
     "CLIPFFTConcatClassifier",
     "CLIPLinearClassifier",
     "FrequencyOnlyClassifier",
+    "FactorizedSpectralTokenAdapter",
+    "GlobalFilterTokenAdapter",
+    "InternalAdapterCLIPClassifier",
+    "SpatialTokenAdapter",
+    "WaveletTokenAdapter",
 ]

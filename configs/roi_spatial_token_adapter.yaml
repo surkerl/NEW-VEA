@@ -1,0 +1,35 @@
+dataset:
+  name: emotionroi
+  root: "D:/OneDrive/Desktop/TEP-VEA/EmotionROI"
+  input_size: 224
+  use_official_split: true
+
+model:
+  name: spatial_token_adapter
+  clip_model: "ViT-B-16"
+  clip_pretrained: "openai"
+  freeze_clip: true
+  adapter_indices: [3, 7, 11]
+  bottleneck_dim: 128
+  dropout: 0.2
+  adapter_dropout: 0.1
+  layer_scale_init: 1.0e-4
+  radial_bands: 6
+  orientation_bins: 6
+
+train:
+  epochs: 100
+  batch_size: 16
+  num_workers: 4
+  seed: 42
+  deterministic: true
+  amp: true
+  patience: 25
+  weight_decay: 1.0e-4
+  head_lr: 5.0e-4
+  adapter_lr: 1.0e-3
+  backbone_lr: 1.0e-5
+  min_lr: 1.0e-6
+
+logging:
+  run_name: "roi_spatial_token_adapter_seed42"

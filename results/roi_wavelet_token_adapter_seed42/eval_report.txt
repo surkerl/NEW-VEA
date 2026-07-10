@@ -1,0 +1,17 @@
+checkpoint: checkpoints/roi_wavelet_token_adapter_seed42/best.pt
+test_loss: 0.877862
+test_acc: 0.680135
+macro_f1: 0.684019
+
+              precision    recall  f1-score   support
+
+       anger     0.7250    0.5859    0.6480        99
+     disgust     0.9157    0.7677    0.8352        99
+        fear     0.5957    0.5657    0.5803        99
+         joy     0.7553    0.7172    0.7358        99
+     sadness     0.6881    0.7576    0.7212        99
+    surprise     0.5075    0.6869    0.5837        99
+
+    accuracy                         0.6801       594
+   macro avg     0.6979    0.6801    0.6840       594
+weighted avg     0.6979    0.6801    0.6840       594

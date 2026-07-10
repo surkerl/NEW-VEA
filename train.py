@@ -16,7 +16,9 @@ from src.models import (
     CLIPFFTConcatClassifier,
     CLIPLinearClassifier,
     FrequencyOnlyClassifier,
+    InternalAdapterCLIPClassifier,
 )
+from src.models.internal_spectral_adapters import count_trainable_parameters
 from src.utils.checkpoint import save_checkpoint
 from src.utils.config import load_config, set_nested
 from src.utils.logger import setup_logger
@@ -133,6 +135,27 @@ def build_model(config: dict[str, Any], num_classes: int) -> nn.Module:
             residual_scale=float(model_cfg.get("residual_scale", 0.25)),
             response_logit_scale=float(model_cfg.get("response_logit_scale", 0.1)),
         )
+    internal_adapter_types = {
+        "spatial_token_adapter": "spatial",
+        "spectral_global_filter_adapter": "global_filter",
+        "spectral_factorized_filter_adapter": "factorized_filter",
+        "wavelet_token_adapter": "wavelet",
+    }
+    if model_name in internal_adapter_types:
+        return InternalAdapterCLIPClassifier(
+            num_classes=num_classes,
+            clip_model=model_cfg.get("clip_model", "ViT-B-16"),
+            clip_pretrained=model_cfg.get("clip_pretrained", "openai"),
+            freeze_clip=bool(model_cfg.get("freeze_clip", True)),
+            adapter_type=internal_adapter_types[model_name],
+            adapter_indices=model_cfg.get("adapter_indices", [3, 7, 11]),
+            bottleneck_dim=int(model_cfg.get("bottleneck_dim", 128)),
+            dropout=float(model_cfg.get("dropout", 0.2)),
+            adapter_dropout=float(model_cfg.get("adapter_dropout", 0.1)),
+            layer_scale_init=float(model_cfg.get("layer_scale_init", 1.0e-4)),
+            radial_bands=int(model_cfg.get("radial_bands", 6)),
+            orientation_bins=int(model_cfg.get("orientation_bins", 6)),
+        )
     raise ValueError(f"Unsupported model.name: {model_name}")
 
 
@@ -149,6 +172,29 @@ def make_optimizer(model: nn.Module, config: dict[str, Any]) -> torch.optim.Opti
     head_lr = float(train_cfg.get("head_lr", 1.0e-3))
     spectral_lr = float(train_cfg.get("spectral_lr", head_lr))
     backbone_lr = float(train_cfg.get("backbone_lr", 1.0e-5))
+
+    internal_adapter_names = {
+        "spatial_token_adapter",
+        "spectral_global_filter_adapter",
+        "spectral_factorized_filter_adapter",
+        "wavelet_token_adapter",
+    }
+    if model_name in internal_adapter_names:
+        if not isinstance(model, InternalAdapterCLIPClassifier):
+            raise TypeError(f"{model_name} must build InternalAdapterCLIPClassifier.")
+        adapter_lr = float(train_cfg.get("adapter_lr", 1.0e-3))
+        adapter_params = [parameter for parameter in model.adapters.parameters() if parameter.requires_grad]
+        classifier_params = [parameter for parameter in model.classifier.parameters() if parameter.requires_grad]
+        clip_trainable = [parameter for parameter in model.clip_model.parameters() if parameter.requires_grad]
+        if clip_trainable:
+            raise ValueError("Phase 7 optimizer must not include trainable CLIP parameters.")
+        return torch.optim.AdamW(
+            [
+                {"params": classifier_params, "lr": head_lr, "name": "classifier"},
+                {"params": adapter_params, "lr": adapter_lr, "name": "adapters"},
+            ],
+            weight_decay=weight_decay,
+        )
 
     if model_name == "frequency_only":
         lr = float(train_cfg.get("lr", 1.0e-3))
@@ -176,6 +222,66 @@ def current_lr(optimizer: torch.optim.Optimizer) -> float:
     return max(float(group["lr"]) for group in optimizer.param_groups)
 
 
+PHASE7_MODEL_NAMES = (
+    "spatial_token_adapter",
+    "spectral_global_filter_adapter",
+    "spectral_factorized_filter_adapter",
+    "wavelet_token_adapter",
+)
+
+
+def record_phase7_parameter_counts(
+    model: InternalAdapterCLIPClassifier,
+    model_name: str,
+    logger,
+) -> None:
+    counts = count_trainable_parameters(model)
+    logger.info(
+        "Parameters: "
+        f"total={counts['total_params']} frozen_clip={counts['frozen_clip_params']} "
+        f"adapters={counts['adapter_params']} classifier={counts['classifier_params']} "
+        f"trainable={counts['trainable_params']}"
+    )
+    output_path = Path("results/phase7_parameter_counts.csv")
+    fieldnames = [
+        "model",
+        "adapter_type",
+        "total_params",
+        "frozen_clip_params",
+        "adapter_params",
+        "classifier_params",
+        "trainable_params",
+    ]
+    rows: dict[str, dict[str, str]] = {}
+    if output_path.exists():
+        with output_path.open(newline="", encoding="utf-8-sig") as f:
+            for row in csv.DictReader(f):
+                if row.get("model") in PHASE7_MODEL_NAMES:
+                    rows[row["model"]] = row
+    rows[model_name] = {
+        "model": model_name,
+        "adapter_type": model.adapter_type,
+        **{key: str(value) for key, value in counts.items()},
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for name in PHASE7_MODEL_NAMES:
+            if name in rows:
+                writer.writerow(rows[name])
+
+    if all(name in rows for name in PHASE7_MODEL_NAMES):
+        classifier_counts = {int(rows[name]["classifier_params"]) for name in PHASE7_MODEL_NAMES}
+        if len(classifier_counts) != 1:
+            raise RuntimeError("Phase 7 classifier parameter counts are not identical.")
+        adapter_counts = [int(rows[name]["adapter_params"]) for name in PHASE7_MODEL_NAMES]
+        ratio = max(adapter_counts) / max(min(adapter_counts), 1)
+        logger.info(f"Phase 7 adapter parameter max/min ratio={ratio:.3f}")
+        if ratio > 2.5:
+            raise RuntimeError(f"Phase 7 adapter parameter ratio {ratio:.3f} exceeds 2.5.")
+
+
 def build_model_state_for_checkpoint(model: nn.Module) -> tuple[dict[str, torch.Tensor], str]:
     if hasattr(model, "has_trainable_backbone") and not model.has_trainable_backbone:
         state = {
@@ -198,7 +304,7 @@ def run_epoch(
     scaler: torch.amp.GradScaler | None = None,
     use_amp: bool = False,
     response_loss_weight: float = 0.0,
-) -> tuple[float, float, bool, float | None, float | None]:
+) -> tuple[float, float, bool, float | None, float | None, dict[str, float | None]]:
     is_train = optimizer is not None
     model.train(is_train)
     if (
@@ -212,6 +318,17 @@ def run_epoch(
     loss_meter = AverageMeter()
     response_loss_meter = AverageMeter()
     gate_meter = AverageMeter()
+    adapter_meters = {
+        "adapter_residual_abs_mean": AverageMeter(),
+        "adapter_residual_norm": AverageMeter(),
+        "layer_scale_mean": AverageMeter(),
+    }
+    adapter_output_keys = {
+        "adapter_residual_abs_mean": "adapter_residual_abs_mean",
+        "adapter_residual_norm": "adapter_residual_norm",
+        "adapter_layer_scales": "layer_scale_mean",
+    }
+    saw_adapter_metrics: set[str] = set()
     correct = 0
     total = 0
     optimizer_step_done = False
@@ -261,6 +378,12 @@ def run_epoch(
             gate_value = output["gate"].detach().float().mean().item()
             gate_meter.update(gate_value, batch_size)
             saw_gate = True
+        if isinstance(output, dict):
+            for output_key, metric_key in adapter_output_keys.items():
+                if output_key in output:
+                    value = output[output_key].detach().float().mean().item()
+                    adapter_meters[metric_key].update(value, batch_size)
+                    saw_adapter_metrics.add(metric_key)
         batch_correct, batch_total = accuracy_from_logits(logits.detach(), labels)
         correct += batch_correct
         total += batch_total
@@ -271,6 +394,10 @@ def run_epoch(
         optimizer_step_done,
         response_loss_meter.avg if saw_response_loss else None,
         gate_meter.avg if saw_gate else None,
+        {
+            key: meter.avg if key in saw_adapter_metrics else None
+            for key, meter in adapter_meters.items()
+        },
     )
 
 
@@ -374,6 +501,8 @@ def main() -> int:
     )
 
     model = build_model(config, num_classes=len(discovery.class_to_idx)).to(device)
+    if isinstance(model, InternalAdapterCLIPClassifier):
+        record_phase7_parameter_counts(model, str(model_cfg["name"]), logger)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = make_optimizer(model, config)
@@ -410,6 +539,12 @@ def main() -> int:
                 "test_response_loss",
                 "train_gate_mean",
                 "test_gate_mean",
+                "train_adapter_residual_abs_mean",
+                "test_adapter_residual_abs_mean",
+                "train_adapter_residual_norm",
+                "test_adapter_residual_norm",
+                "train_layer_scale_mean",
+                "test_layer_scale_mean",
             ]
         )
 
@@ -421,7 +556,14 @@ def main() -> int:
     for epoch in range(1, epochs + 1):
         epoch_start_time = time.time()
         compute_start_time = time.time()
-        train_loss, train_acc, optimizer_step_done, train_response_loss, train_gate_mean = run_epoch(
+        (
+            train_loss,
+            train_acc,
+            optimizer_step_done,
+            train_response_loss,
+            train_gate_mean,
+            train_adapter_metrics,
+        ) = run_epoch(
             model,
             train_loader,
             criterion,
@@ -431,7 +573,14 @@ def main() -> int:
             use_amp=use_amp,
             response_loss_weight=response_loss_weight,
         )
-        test_loss, test_acc, _, test_response_loss, test_gate_mean = run_epoch(
+        (
+            test_loss,
+            test_acc,
+            _,
+            test_response_loss,
+            test_gate_mean,
+            test_adapter_metrics,
+        ) = run_epoch(
             model,
             test_loader,
             criterion,
@@ -480,6 +629,24 @@ def main() -> int:
                     f"{test_response_loss:.6f}" if test_response_loss is not None else "",
                     f"{train_gate_mean:.6f}" if train_gate_mean is not None else "",
                     f"{test_gate_mean:.6f}" if test_gate_mean is not None else "",
+                    f"{train_adapter_metrics['adapter_residual_abs_mean']:.6f}"
+                    if train_adapter_metrics["adapter_residual_abs_mean"] is not None
+                    else "",
+                    f"{test_adapter_metrics['adapter_residual_abs_mean']:.6f}"
+                    if test_adapter_metrics["adapter_residual_abs_mean"] is not None
+                    else "",
+                    f"{train_adapter_metrics['adapter_residual_norm']:.6f}"
+                    if train_adapter_metrics["adapter_residual_norm"] is not None
+                    else "",
+                    f"{test_adapter_metrics['adapter_residual_norm']:.6f}"
+                    if test_adapter_metrics["adapter_residual_norm"] is not None
+                    else "",
+                    f"{train_adapter_metrics['layer_scale_mean']:.8f}"
+                    if train_adapter_metrics["layer_scale_mean"] is not None
+                    else "",
+                    f"{test_adapter_metrics['layer_scale_mean']:.8f}"
+                    if test_adapter_metrics["layer_scale_mean"] is not None
+                    else "",
                 ]
             )
 
@@ -487,11 +654,18 @@ def main() -> int:
             f"Epoch {epoch:03d}/{epochs:03d} | "
             f"train_loss={train_loss:.4f} train_acc={train_acc:.4f} | "
             f"test_loss={test_loss:.4f} test_acc={test_acc:.4f} | "
-            f"lr={lr_value:.2e} | patience={patience_counter}/{patience}"
+            f"lr={lr_value:.2e}"
         )
         gate_for_log = test_gate_mean if test_gate_mean is not None else train_gate_mean
         if gate_for_log is not None:
-            line = line.replace(f"lr={lr_value:.2e} |", f"lr={lr_value:.2e} | gate={gate_for_log:.3f} |")
+            line += f" | gate={gate_for_log:.3f}"
+        adapter_for_log = test_adapter_metrics["adapter_residual_abs_mean"]
+        gamma_for_log = test_adapter_metrics["layer_scale_mean"]
+        if adapter_for_log is not None:
+            line += f" | adapter={adapter_for_log:.4f}"
+        if gamma_for_log is not None:
+            line += f" gamma={gamma_for_log:.6f}"
+        line += f" | patience={patience_counter}/{patience}"
         if is_best:
             line += " (new best)"
         logger.info(line)

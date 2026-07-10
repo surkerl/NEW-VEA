@@ -1,0 +1,5 @@
+model,adapter_type,total_params,frozen_clip_params,adapter_params,classifier_params,trainable_params
+spatial_token_adapter,spatial,150276615,149620737,652800,3078,655878
+spectral_global_filter_adapter,global_filter,150309255,149620737,685440,3078,688518
+spectral_factorized_filter_adapter,factorized_filter,150237447,149620737,613632,3078,616710
+wavelet_token_adapter,wavelet,150238611,149620737,614796,3078,617874

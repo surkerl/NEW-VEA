@@ -1,0 +1,27 @@
+Run: roi_spatial_token_adapter_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Parameters: total=150276615 frozen_clip=149620737 adapters=652800 classifier=3078 trainable=655878
+Phase 7 adapter parameter max/min ratio=1.117
+Epoch 001/100 | train_loss=1.5722 train_acc=0.4177 | test_loss=1.2990 test_acc=0.6010 | lr=1.00e-03 | adapter=0.7267 gamma=0.005976 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=1.1274 train_acc=0.6515 | test_loss=1.0703 test_acc=0.6465 | lr=1.00e-03 | adapter=0.7904 gamma=0.007434 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=0.9232 train_acc=0.7042 | test_loss=1.0415 test_acc=0.6330 | lr=9.99e-04 | adapter=0.5445 gamma=0.008622 | patience=1/25
+Epoch 004/100 | train_loss=0.7823 train_acc=0.7359 | test_loss=0.9501 test_acc=0.6481 | lr=9.98e-04 | adapter=0.5879 gamma=0.010027 | patience=0/25 (new best)
+Epoch 005/100 | train_loss=0.6532 train_acc=0.7807 | test_loss=0.9395 test_acc=0.6465 | lr=9.96e-04 | adapter=0.7406 gamma=0.011335 | patience=1/25
+Epoch 006/100 | train_loss=0.5502 train_acc=0.8211 | test_loss=1.0002 test_acc=0.6330 | lr=9.94e-04 | adapter=0.6817 gamma=0.012345 | patience=2/25
+Epoch 007/100 | train_loss=0.4398 train_acc=0.8543 | test_loss=0.9944 test_acc=0.6364 | lr=9.91e-04 | adapter=0.6314 gamma=0.013238 | patience=3/25
+Epoch 008/100 | train_loss=0.3790 train_acc=0.8860 | test_loss=1.1248 test_acc=0.6313 | lr=9.88e-04 | adapter=0.6984 gamma=0.014290 | patience=4/25
+Epoch 009/100 | train_loss=0.2985 train_acc=0.9062 | test_loss=1.1159 test_acc=0.6330 | lr=9.84e-04 | adapter=0.6407 gamma=0.015146 | patience=5/25
+Epoch 010/100 | train_loss=0.2416 train_acc=0.9278 | test_loss=1.1601 test_acc=0.6465 | lr=9.80e-04 | adapter=0.6467 gamma=0.015935 | patience=6/25
+Epoch 011/100 | train_loss=0.1741 train_acc=0.9517 | test_loss=1.3435 test_acc=0.6178 | lr=9.76e-04 | adapter=0.7015 gamma=0.016841 | patience=7/25
+Epoch 012/100 | train_loss=0.1412 train_acc=0.9704 | test_loss=1.3525 test_acc=0.6077 | lr=9.70e-04 | adapter=0.6997 gamma=0.017300 | patience=8/25
+Epoch 013/100 | train_loss=0.1094 train_acc=0.9719 | test_loss=1.3521 test_acc=0.6330 | lr=9.65e-04 | adapter=0.6814 gamma=0.017910 | patience=9/25
+Epoch 014/100 | train_loss=0.0843 train_acc=0.9805 | test_loss=1.4501 test_acc=0.5993 | lr=9.59e-04 | adapter=0.6977 gamma=0.018453 | patience=10/25
+Epoch 015/100 | train_loss=0.0796 train_acc=0.9848 | test_loss=1.4866 test_acc=0.6094 | lr=9.52e-04 | adapter=0.6363 gamma=0.018842 | patience=11/25
+Epoch 016/100 | train_loss=0.0589 train_acc=0.9870 | test_loss=1.5861 test_acc=0.6145 | lr=9.46e-04 | adapter=0.6606 gamma=0.019263 | patience=12/25
+Manual Early stopping triggered at epoch 16 after sustained overfitting.
+best_acc=0.6481
+best_epoch=4
+best_checkpoint=checkpoints\roi_spatial_token_adapter_seed42\best.pt
+log_path=logs\roi_spatial_token_adapter_seed42.log

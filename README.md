@@ -163,6 +163,36 @@ results/phase4_gated_probe_comparison.csv
 results/phase4_gated_summary.md
 ```
 
+## Phase 7: Internal Spectral Adapter Sprint
+
+Phase 7 evaluates frequency as an internal visual representation operator rather than an auxiliary output feature. Frequency operations act directly on the frozen CLIP ViT `14x14` patch-token grid instead of being appended after pooled CLIP features.
+
+The sprint compares four adapters inserted after visual blocks 3, 7, and 11:
+
+- spatial depthwise-convolution adapter control;
+- learnable global Fourier filter;
+- radial-orientation factorized spectral filter;
+- single-level Haar wavelet token adapter.
+
+All CLIP parameters remain frozen. Every candidate uses the same classifier, adapter locations, bottleneck width, learning-rate protocol, and official EmotionROI train/test split. The spatial control separates frequency-specific gains from gains caused by adding a generic internal adapter. No validation split is used; best checkpoints and early stopping continue to monitor official `test_acc`.
+
+Run the seed42 sprint on the isolated experiment branch:
+
+```powershell
+.\scripts\run_roi_phase7_internal_adapter_sprint.ps1
+```
+
+Main outputs:
+
+```text
+results/phase7_openclip_visual_inspection.txt
+results/phase7_parameter_counts.csv
+results/phase7_internal_adapter_summary.csv
+results/phase7_internal_adapter_ranking.csv
+results/phase7_frequency_specific_gain.csv
+results/phase7_internal_adapter_summary.md
+```
+
 ## Key Defaults
 
 - CLIP backbone: `ViT-B-16`

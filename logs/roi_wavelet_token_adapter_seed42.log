@@ -1,0 +1,29 @@
+Run: roi_wavelet_token_adapter_seed42
+Device: cuda | AMP: True
+Protocol: official train/test only; no validation split is used.
+Split: split_files | train=1386 test=594 classes=6
+Parameters: total=150238611 frozen_clip=149620737 adapters=614796 classifier=3078 trainable=617874
+Phase 7 adapter parameter max/min ratio=1.117
+Epoch 001/100 | train_loss=1.6137 train_acc=0.3939 | test_loss=1.3567 test_acc=0.6010 | lr=1.00e-03 | adapter=0.2515 gamma=0.010816 | patience=0/25 (new best)
+Epoch 002/100 | train_loss=1.1609 train_acc=0.6421 | test_loss=1.0741 test_acc=0.6481 | lr=1.00e-03 | adapter=0.4191 gamma=0.014212 | patience=0/25 (new best)
+Epoch 003/100 | train_loss=0.9411 train_acc=0.6912 | test_loss=0.9945 test_acc=0.6515 | lr=9.99e-04 | adapter=0.3488 gamma=0.015646 | patience=0/25 (new best)
+Epoch 004/100 | train_loss=0.8129 train_acc=0.7172 | test_loss=0.9317 test_acc=0.6684 | lr=9.98e-04 | adapter=0.3972 gamma=0.017525 | patience=0/25 (new best)
+Epoch 005/100 | train_loss=0.7036 train_acc=0.7633 | test_loss=0.8973 test_acc=0.6448 | lr=9.96e-04 | adapter=0.4328 gamma=0.019092 | patience=1/25
+Epoch 006/100 | train_loss=0.6128 train_acc=0.7980 | test_loss=0.8779 test_acc=0.6801 | lr=9.94e-04 | adapter=0.4047 gamma=0.020778 | patience=0/25 (new best)
+Epoch 007/100 | train_loss=0.5126 train_acc=0.8348 | test_loss=0.9455 test_acc=0.6380 | lr=9.91e-04 | adapter=0.4392 gamma=0.022244 | patience=1/25
+Epoch 008/100 | train_loss=0.4574 train_acc=0.8550 | test_loss=0.9248 test_acc=0.6515 | lr=9.88e-04 | adapter=0.4337 gamma=0.023867 | patience=2/25
+Epoch 009/100 | train_loss=0.3651 train_acc=0.8810 | test_loss=0.9687 test_acc=0.6397 | lr=9.84e-04 | adapter=0.4495 gamma=0.025465 | patience=3/25
+Epoch 010/100 | train_loss=0.3113 train_acc=0.8983 | test_loss=0.9813 test_acc=0.6549 | lr=9.80e-04 | adapter=0.4822 gamma=0.026753 | patience=4/25
+Epoch 011/100 | train_loss=0.2473 train_acc=0.9307 | test_loss=1.1272 test_acc=0.6431 | lr=9.76e-04 | adapter=0.4799 gamma=0.028038 | patience=5/25
+Epoch 012/100 | train_loss=0.2017 train_acc=0.9444 | test_loss=1.1188 test_acc=0.6380 | lr=9.70e-04 | adapter=0.4666 gamma=0.029187 | patience=6/25
+Epoch 013/100 | train_loss=0.1554 train_acc=0.9661 | test_loss=1.1407 test_acc=0.6515 | lr=9.65e-04 | adapter=0.4835 gamma=0.030362 | patience=7/25
+Epoch 014/100 | train_loss=0.1200 train_acc=0.9726 | test_loss=1.1905 test_acc=0.6498 | lr=9.59e-04 | adapter=0.4836 gamma=0.031379 | patience=8/25
+Epoch 015/100 | train_loss=0.0854 train_acc=0.9877 | test_loss=1.2678 test_acc=0.6431 | lr=9.52e-04 | adapter=0.5027 gamma=0.032317 | patience=9/25
+Epoch 016/100 | train_loss=0.0625 train_acc=0.9906 | test_loss=1.3088 test_acc=0.6397 | lr=9.46e-04 | adapter=0.4773 gamma=0.032859 | patience=10/25
+Epoch 017/100 | train_loss=0.0461 train_acc=0.9942 | test_loss=1.3378 test_acc=0.6498 | lr=9.38e-04 | adapter=0.4911 gamma=0.033252 | patience=11/25
+Epoch 018/100 | train_loss=0.0350 train_acc=0.9949 | test_loss=1.5227 test_acc=0.6229 | lr=9.30e-04 | adapter=0.5072 gamma=0.033822 | patience=12/25
+Manual Early stopping triggered at epoch 18 after sustained overfitting.
+best_acc=0.6801
+best_epoch=6
+best_checkpoint=checkpoints\roi_wavelet_token_adapter_seed42\best.pt
+log_path=logs\roi_wavelet_token_adapter_seed42.log
