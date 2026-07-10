@@ -1,17 +1,17 @@
 checkpoint: checkpoints/roi_spatial_token_adapter_seed42/best.pt
-test_loss: 0.950066
-test_acc: 0.648148
-macro_f1: 0.649662
+test_loss: 1.306973
+test_acc: 0.654882
+macro_f1: 0.654244
 
               precision    recall  f1-score   support
 
-       anger     0.7544    0.4343    0.5513        99
-     disgust     0.9250    0.7475    0.8268        99
-        fear     0.5816    0.5758    0.5787        99
-         joy     0.6218    0.7475    0.6789        99
+       anger     0.6168    0.6667    0.6408        99
+     disgust     0.8317    0.8485    0.8400        99
+        fear     0.5750    0.4646    0.5140        99
+         joy     0.7407    0.6061    0.6667        99
      sadness     0.6893    0.7172    0.7030        99
-    surprise     0.4818    0.6667    0.5593        99
+    surprise     0.5082    0.6263    0.5611        99
 
-    accuracy                         0.6481       594
-   macro avg     0.6757    0.6481    0.6497       594
-weighted avg     0.6757    0.6481    0.6497       594
+    accuracy                         0.6549       594
+   macro avg     0.6603    0.6549    0.6542       594
+weighted avg     0.6603    0.6549    0.6542       594
